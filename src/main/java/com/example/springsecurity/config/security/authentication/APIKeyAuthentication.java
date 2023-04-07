@@ -1,14 +1,22 @@
 package com.example.springsecurity.config.security.authentication;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
+import javax.security.auth.Subject;
 import java.util.Collection;
 
-public class CustomAuthentication implements Authentication {
+@RequiredArgsConstructor
+public class APIKeyAuthentication implements Authentication {
 
 	private boolean authenticated;
-	private String key;
+
+	private final String apiKey;
+
+	public String getApiKey() {
+		return apiKey;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -45,11 +53,8 @@ public class CustomAuthentication implements Authentication {
 		return null;
 	}
 
-	public String getKey() {
-		return key;
-	}
-
-	public void setKey(String key) {
-		this.key = key;
+	@Override
+	public boolean implies(Subject subject) {
+		return Authentication.super.implies(subject);
 	}
 }

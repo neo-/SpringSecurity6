@@ -1,7 +1,8 @@
 package com.example.springsecurity.config;
 
-import com.example.springsecurity.config.security.filters.CustomAuthenticationFilter;
+import com.example.springsecurity.config.security.filters.ApiKeyFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,18 +12,20 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @Configuration
-public class WebSecurityConfig {
+public class SecurityConfig {
 
-	@Autowired
-	private CustomAuthenticationFilter customAuthenticationFilter;
+	@Value("${api.key}")
+	private String apiKey;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				.addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+				.httpBasic()
+				.and()
+				.addFilterAt(new ApiKeyFilter(apiKey), BasicAuthenticationFilter.class)
 				.authorizeRequests().anyRequest().authenticated()
 				.and().build();
 	}

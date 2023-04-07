@@ -1,24 +1,21 @@
 package com.example.springsecurity.config.security.providers;
 
-import com.example.springsecurity.config.security.authentication.CustomAuthentication;
-import org.springframework.beans.factory.annotation.Value;
+import com.example.springsecurity.config.security.authentication.APIKeyAuthentication;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.stereotype.Component;
 
-@Component
-public class CustomAuthenticationProvider implements AuthenticationProvider {
+@RequiredArgsConstructor
+public class ApiKeyAuthenticationProvider implements AuthenticationProvider {
 
-	@Value("${secret.key}")
-	private String key;
+	private final String key;
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		CustomAuthentication ca = (CustomAuthentication) authentication;
-		if (key.equals(ca.getKey())) {
-			ca = new CustomAuthentication();
+		var ca = (APIKeyAuthentication) authentication;
+		if (key.equals(ca.getApiKey())) {
 			ca.setAuthenticated(true);
 			return ca;
 		}
@@ -27,6 +24,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public boolean supports(Class<?> authentication) {
-		return CustomAuthentication.class.equals(authentication);
+		return APIKeyAuthentication.class.equals(authentication);
 	}
 }
