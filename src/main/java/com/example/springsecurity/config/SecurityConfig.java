@@ -29,11 +29,12 @@ public class SecurityConfig {
 				.httpBasic()
 				.and()
 				.addFilterAt(new ApiKeyFilter(apiKey), BasicAuthenticationFilter.class)
-				.authorizeRequests().anyRequest()
-				//.authenticated()
-				//.permitAll()
-				.hasAuthority(SecurityAuthorities.WRITE)
-				.and().build();
+				.authorizeHttpRequests((authorize) -> {
+					authorize.requestMatchers("demo").hasAuthority(SecurityRole.MANAGER)
+							.anyRequest().authenticated();
+
+				})
+				.build();
 	}
 
 	@Bean
@@ -49,13 +50,13 @@ public class SecurityConfig {
 				.build();
 		var u2 = User.withUsername("jenifer")
 				.password("12345")
-				.authorities(SecurityAuthorities.READ)
-				//.roles(SecurityRole.MANAGER)
+				.authorities(
+						new SimpleGrantedAuthority(SecurityAuthorities.READ),
+						new SimpleGrantedAuthority(SecurityRole.MANAGER))
 				.build();
 		var u3 = User.withUsername("john")
 				.password("12345")
 				.authorities(SecurityAuthorities.READ)
-				//.roles(SecurityRole.USER)
 				.build();
 
 		uds.createUser(u1);
