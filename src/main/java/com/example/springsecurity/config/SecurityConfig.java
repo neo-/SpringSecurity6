@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -29,11 +30,12 @@ public class SecurityConfig {
 				.httpBasic()
 				.and()
 				.addFilterAt(new ApiKeyFilter(apiKey), BasicAuthenticationFilter.class)
-				.authorizeHttpRequests((authorize) -> {
-					authorize.requestMatchers("demo").hasAuthority(SecurityRole.MANAGER)
-							.anyRequest().authenticated();
-
-				})
+				.authorizeHttpRequests((authorize) -> authorize
+						.requestMatchers(HttpMethod.GET, "/api/**")
+						.hasAuthority(SecurityAuthorities.READ)
+						.requestMatchers(HttpMethod.POST, "/api/**")
+						.hasAuthority(SecurityAuthorities.WRITE)
+						.anyRequest().authenticated())
 				.build();
 	}
 
@@ -56,7 +58,7 @@ public class SecurityConfig {
 				.build();
 		var u3 = User.withUsername("john")
 				.password("12345")
-				.authorities(SecurityAuthorities.READ)
+				.authorities(SecurityAuthorities.WRITE)
 				.build();
 
 		uds.createUser(u1);
